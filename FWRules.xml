@@ -1,0 +1,116 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<firewall-definition>
+  <networks>
+    <network id="CAN1"/>
+    <network id="CAN2"/>
+    <network id="OUTSIDE"/>
+  </networks>
+
+  <rules>
+    <rule cid="23" id="obd_diag_engine">
+      <source network="OUTSIDE"/>
+      <destination network="CAN1"/>
+      <payload>
+        <expression>
+          <operator type="AND">
+            <byte index="0" value="10"/>
+            <byte index="1" value-range="2..10"/>
+          </operator>
+        </expression>
+      </payload>
+    </rule>
+
+    <rule cid="23" id="obd_diag_engine_ex">
+      <source network="OUTSIDE"/>
+      <destination network="CAN1"/>
+      <payload>
+        <expression>
+          <operator type="AND">
+            <byte index="6" value="10"/>
+            <byte index="7" value-range="2..10"/>
+            <operator type="OR">
+              <operator type="AND">
+                <byte index="1" value-range="1..200"/>
+                <byte index="2" value-range="3..19"/>
+              </operator>
+              <operator type="AND">
+                <byte index="1" value-range="201..220"/>
+                <byte index="2" value-range="20..25"/>
+              </operator>
+            </operator>
+          </operator>
+        </expression>
+      </payload>
+    </rule>
+
+    <rule cid="24" id="obd_diag_lambda">
+      <source network="OUTSIDE"/>
+      <destination network="CAN2"/>
+      <payload>
+        <byte index="2" value="10"/>
+      </payload>
+    </rule>
+
+    <rule cid="24" id="obd_diag_lambda_ex">
+      <source network="OUTSIDE"/>
+      <destination network="CAN2"/>
+      <payload>
+        <byte index="2" value="15"/>
+      </payload>
+    </rule>
+	
+	<rule cid="25" id="obd_diag_m1">
+      <source network="OUTSIDE"/>
+      <destination network="CAN2"/>
+      <payload>
+        <byte index="3" value="75"/>
+		<byte index="7" value-range="2..10"/>
+      </payload>
+    </rule>
+	
+	<rule cid="26" id="obd_diag_m2">
+      <source network="OUTSIDE"/>
+      <destination network="CAN2"/>
+      <payload>
+        <byte index="1" value="13"/>
+		<byte index="2" value-range="2..5"/>
+      </payload>
+    </rule>
+	
+	<rule cid="27" id="obd_diag_m3">
+      <source network="OUTSIDE"/>
+      <destination network="CAN2"/>
+      <payload>
+        <byte index="1" value="17"/>
+		<byte index="2" value-range="2..5"/>
+      </payload>
+    </rule>
+	
+  </rules>
+
+  <rule-chains>
+    <chain cid="23" id="rules-for-cid=23">
+      <rule id="obd_diag_engine" action="PERMIT-LOG" message="This is a test message that should be written to file!"/>
+      <rule id="obd_diag_engine_ex" action="DROP"/>
+      <default action="PERMIT"/>
+    </chain>
+
+    <chain cid="24" id="rules-for-cid=24">
+      <rule id="obd_diag_lambda" action="DROP" message="This is another message!"/>
+      <default action="PERMIT"/>
+    </chain>
+  </rule-chains>
+
+  <state-chains>
+    <chain id="st-diag-lambda">
+      <rule id="obd_diag_m1" action="PERMIT"/>
+	  <rule id="obd_diag_m2" action="PERMIT"/>
+	  <rule id="obd_diag_m3" action="PERMIT"/>
+      <rule id="obd_diag_engine" action="DROP"/>
+    </chain>
+    <chain id="st-diag-lambdaxx">
+      <rule id="obd_diag_lambda_ex" action="PERMIT"/>
+      <rule id="obd_diag_engine_ex" action="DROP"/>
+    </chain>
+  </state-chains>
+</firewall-definition>
