@@ -7,6 +7,11 @@ The following dependencies must be installed in order to build the _dias-firewal
 ```
 sudo apt install g++ libexpat-dev libconfig-dev
 ```
+and for utils:
+```
+sudo apt install can-utils
+pip3 install python-can
+```
 
 ## Building the project
 The build script _build.sh_ is used to compile the current project. Use:
