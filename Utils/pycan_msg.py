@@ -1,0 +1,35 @@
+#!/usr/bin/env python3
+
+import can
+
+def setup_listener(type, log_file):
+    ### Writing recieved messages to FILE ###
+    if type == 0:
+        listener = None
+    elif type == 1:
+        listener = can.Logger(log_file)
+    elif type == 2:
+        listener = can.ASCWriter(log_file)
+    else:
+        listener = can.BLFWriter(log_file,'b')
+
+    return listener
+
+def setup_notifier(listener):
+    if listener:
+        notifier = can.Notifier(bus, [listener, can.Printer()])
+    else:
+        notifier = None
+
+    return notifier
+
+def read_messages_from_file(log_file):
+
+    print("Reading from file: ", log_file)
+    can_log = can.LogReader(log_file)
+
+    return can_log
+
+def create_message(id, msg_data, extended):
+     msg = can.Message(is_extended_id=extended, arbitration_id=id, data = msg_data)
+     return msg
