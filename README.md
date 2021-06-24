@@ -13,6 +13,11 @@ sudo apt install can-utils
 pip3 install python-can
 ```
 
+## Resources
+
+Firewall log file should be placed in __/var/log/dias-firewall/dfw.log__
+The named piped used by the Firewall to receive can messages from _pycan_recv.py_ script should be located in __/tmp/canfw_pipe__
+
 ## Building the project
 The build script _build.sh_ is used to compile the current project. Use:
 ```
