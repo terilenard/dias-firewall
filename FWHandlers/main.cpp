@@ -13,7 +13,7 @@ void sig_handler(int sig)
     g_exit = true;
 }
 
-void CAN_callback(int idx, unsigned char* payload, void* arg);
+void CAN_callback(int idx, unsigned char* payload, void* arg, int dlc);
 
 int main()
 {
@@ -47,15 +47,15 @@ int main()
 	return 0;
 }
 
-void CAN_callback(int idx, unsigned char* payload, void* arg)
+void CAN_callback(int idx, unsigned char* payload, void* arg, int dlc)
 {
     int fwInst = *(int*)arg;
 
     printf("Received CAN frame with idx: %d, payload: ", idx);
-    for (int i = 0 ; i < 8 ; ++i) {
+    for (int i = 0 ; i < dlc ; ++i) {
         printf("%X ", payload[i]);
     }
     printf("\n");
 
-    processMessage(fwInst, idx, payload, 8);
+    processMessage(fwInst, idx, payload, dlc);
 }

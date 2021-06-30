@@ -10,7 +10,7 @@ public:
     CANHandler();
     virtual ~CANHandler();
 
-    bool initialize(void(*callback)(int idx, unsigned char* payload, void* arg), void* arg);
+    bool initialize(void(*callback)(int idx, unsigned char* payload, void* arg, int dlc), void* arg);
     bool runHandler(void);
 
 private:
@@ -19,7 +19,7 @@ private:
     struct pollfd m_poll;
 #endif
 
-    void (*m_callback)(int idx, unsigned char* payload, void* arg);
+    void (*m_callback)(int idx, unsigned char* payload, void* arg, int dlc);
     void* m_arg;
 };
 

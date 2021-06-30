@@ -57,6 +57,7 @@ bool ExpatWrapper::parseFile(const char* pFileName)
 	// Open file, read all and parse
 	FILE* pf = fopen(pFileName, "rt");
 	if (NULL == pf) {
+		printf("File Error\m");
 		return false;
 	}
 
@@ -70,6 +71,7 @@ bool ExpatWrapper::parseFile(const char* pFileName)
 	}
 
 	if (0 == XML_Parse(m_pParser, sFullFile.c_str(), sFullFile.length(), true)) {
+		printf("XML parse err");
 		return false;
 	}
 

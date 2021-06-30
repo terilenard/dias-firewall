@@ -33,6 +33,7 @@ bool FirewallManager::initialize(void)
 	if (!m_pRuleRunner->initialise()) {
 		delete m_pRuleRunner;
 		m_pRuleRunner = NULL;
+		printf("Fw Rules processor\n");
 		return false;
 	}
 
@@ -40,11 +41,12 @@ bool FirewallManager::initialize(void)
 		m_pRuleRunner->destroy();
 		delete m_pRuleRunner;
 		m_pRuleRunner = NULL;
+		printf("Rule runner\n");
 		return false;
 	}
 
 	m_pRuleRunner->printRules();
-	
+	printf("Printing Rules\n");
 	return true;
 }
 

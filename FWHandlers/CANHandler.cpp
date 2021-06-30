@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <poll.h>
+#include <cstring>
 #endif
 
 
@@ -30,14 +31,14 @@ CANHandler::~CANHandler()
 #endif
 }
 
-bool CANHandler::initialize(void (*callback)(int idx, unsigned char* payload, void* arg), void* arg)
+bool CANHandler::initialize(void (*callback)(int idx, unsigned char* payload, void* arg, int dlc), void* arg)
 {
     m_callback = callback;
     m_arg = arg;
 
 #ifndef WIN32
 
-    const char* fifo = "./canfw_pipe";
+    const char* fifo = "/tmp/canfw_pipe";
 
     // Create the named pipe, read and write rights only for the owner
     int result = mkfifo(fifo, S_IFIFO | S_IRUSR | S_IWUSR);
@@ -65,7 +66,9 @@ bool CANHandler::runHandler(void)
 {
     unsigned int idx;
     unsigned char tidx[4];
+    unsigned char dlc[1];
     unsigned char payload[8];
+    int sdlc;
 
 #ifndef WIN32
 
@@ -82,15 +85,20 @@ bool CANHandler::runHandler(void)
     if (read(m_poll.fd, tidx, 4) < 4) {
         return false;
     }
-    
-    if (read(m_poll.fd, payload, 8) < 8) {
+
+    if (read(m_poll.fd, dlc, 1) < 1) {
         return false;
     }
+    // Convert the DLC to int
+    std::memcpy(&sdlc, dlc, sizeof dlc);
 
+    if (read(m_poll.fd, payload, sdlc) < sdlc) {
+        return false;
+    }
     idx = (tidx[0] << 24) | (tidx[1] << 16) | (tidx[2] << 8) | tidx[3];
-    
+
     // Now fire the callback
-    m_callback( (int)idx, payload, m_arg );
+    m_callback( (int)idx, payload, m_arg, sdlc );
 
 #endif
 
