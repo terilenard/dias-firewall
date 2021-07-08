@@ -1,4 +1,6 @@
 #include "CANHandler.h"
+#include "../FWCoreLibrary/Config.h"
+#include <string>
 
 #ifndef WIN32
 #include <sys/types.h>
@@ -10,10 +12,12 @@
 #include <unistd.h>
 #include <poll.h>
 #include <cstring>
+#include <string>
 #endif
 
 
-CANHandler::CANHandler()
+CANHandler::CANHandler(const char* pszCfgFile):
+    m_sCfgFile(pszCfgFile)
 {
 #ifndef WIN32
     m_poll.fd = -1;
@@ -38,8 +42,16 @@ bool CANHandler::initialize(void (*callback)(int idx, unsigned char* payload, vo
 
 #ifndef WIN32
 
-    const char* fifo = "/tmp/canfw_pipe";
+    const char* fifo;
 
+    fifo = getParameter(m_sCfgFile.c_str(),"canPipe");
+
+    if (!fifo) {
+        printf("Error while reading pipe path from config file\n");
+        return false;
+     }
+
+     printf("Found CAN named pipe: %s\n", fifo);
     // Create the named pipe, read and write rights only for the owner
     int result = mkfifo(fifo, S_IFIFO | S_IRUSR | S_IWUSR);
     if (-1 == result && EEXIST != errno) {

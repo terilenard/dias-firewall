@@ -23,15 +23,15 @@ int main()
 
 
     //  Create the FW instance
-	int fwInst = createFWInstance("../diasfw.cfg");
-	if (fwInst == FWCORE_ERROR) {
-		printf("Error while creating new fw instance");
-		return -1;
-	}
+    int fwInst = createFWInstance("../diasfw.cfg");
+    if (fwInst == FWCORE_ERROR) {
+         printf("Error while creating new fw instance");
+         return -1;
+    }
 
     printf("Init can handler...\n");
 
-    CANHandler hCAN;
+    CANHandler hCAN("../diasfw.cfg");
     if (hCAN.initialize(CAN_callback, (void*)&fwInst) == false) {
         printf("Unable to initialize CAN handler!\n");
         return -1;

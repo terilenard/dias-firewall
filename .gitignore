@@ -30,3 +30,7 @@
 *.exe
 *.out
 *.app
+
+/Build
+/Utils/__pycache__/
+/Utils/pycan.log

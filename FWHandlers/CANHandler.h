@@ -1,13 +1,15 @@
 #pragma once
+#include <string>
 
 #ifndef WIN32
 #include <poll.h>
 #endif
+using namespace std;
 
 class CANHandler
 {
 public:
-    CANHandler();
+    CANHandler(const char* pszCfgFile);
     virtual ~CANHandler();
 
     bool initialize(void(*callback)(int idx, unsigned char* payload, void* arg, int dlc), void* arg);
@@ -21,5 +23,6 @@ private:
 
     void (*m_callback)(int idx, unsigned char* payload, void* arg, int dlc);
     void* m_arg;
+    string m_sCfgFile;
 };
 

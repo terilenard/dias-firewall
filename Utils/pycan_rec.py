@@ -1,4 +1,4 @@
-!/usr/bin/env python3
+#!/usr/bin/env python3
 
 import can
 import time
@@ -6,21 +6,23 @@ import struct
 import os, sys, traceback
 from pycan_com import *
 from pycan_msg import *
+from pyc_logger import logger
 from config import *
 
 
-def listen_and_send(bus, pipeout, listener_type):
+def listen_and_send(canbus, vcanbus, pipeout, listener_type):
 
     listener = setup_listener(listener_type, LOG_FILE)
     notifier = setup_notifier(listener)
 
-    print("Listening for CAN messages")
+    logger.debug("Listening for CAN messages")
 
     try:
         while True:
-            msg = bus.recv(1)
+            msg = canbus.recv(1)
 
             if (msg):
+               send_message_on_can(vcanbus, msg)
                send_message_on_pipe(pipeout, msg)
 
     except KeyboardInterrupt:
@@ -28,22 +30,25 @@ def listen_and_send(bus, pipeout, listener_type):
         pass
 
     except (BrokenPipeError, IOError) as ex:
-        print("Exception: " + str(ex) + ", exiting")
+        logger.error("Exception: " + str(ex) + ", exiting")
         pass
 
     finally:
          if listener:
              notifier.stop()
-         bus.shutdown()
+         canbus.shutdown()
+         vcanbus.shutdown()
 
 
 def main():
 
-    bus = setup_bus(CAN_CHANNEL_REC)
+    canbus = setup_bus(CAN_CHANNEL_REC)
+    vcanbus = setup_bus(CAN_CHANNEL_SEND)
+
     pipeout = create_pipe(PIPE_PATH)
 
-    if (bus and pipeout):
-        listen_and_send(bus, pipeout, LISTENER_TYPE)
+    if (canbus and vcanbus and pipeout):
+        listen_and_send(canbus, vcanbus, pipeout, LISTENER_TYPE)
 
 if __name__ == "__main__":
 

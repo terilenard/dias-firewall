@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import can
+from pyc_logger import logger
 
 def setup_listener(type, log_file):
     ### Writing recieved messages to FILE ###
@@ -25,7 +26,7 @@ def setup_notifier(listener):
 
 def read_messages_from_file(log_file):
 
-    print("Reading from file: ", log_file)
+    logger.debug("Reading from file: ", log_file)
     can_log = can.LogReader(log_file)
 
     return can_log

@@ -13,7 +13,7 @@ then
 
     cd Build/Bin
 
-    g++ -c ../../FWCoreLibrary/*.cpp -fPIC -fvisibility=default 2>/dev/null
+    g++ -c ../../FWCoreLibrary/*.cpp -fPIC -fvisibility=default
 
     cd ..
 
