@@ -27,5 +27,6 @@ private:
 	RuleRunner* m_pRuleRunner;
 	FWCONFIG m_fwConfig;
 	string m_sCfgFile;
+	bool secureLog;
 };
 

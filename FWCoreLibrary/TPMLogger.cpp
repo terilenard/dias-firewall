@@ -1,4 +1,5 @@
 #include "TPMLogger.h"
+#include "Config.h"
 
 #ifndef WIN32
 #include <sys/types.h>
@@ -10,8 +11,8 @@
 #include <unistd.h>
 #endif
 
-TPMLogger::TPMLogger():
-    //m_fd(-1)
+TPMLogger::TPMLogger(const char* pszCfgFile):
+    m_fd(-1), m_sCfgFile(pszCfgFile)
 {
 
 }
@@ -19,9 +20,9 @@ TPMLogger::TPMLogger():
 TPMLogger::~TPMLogger()
 {
 #ifndef WIN32
-    //if (m_fd != -1) {
-    //    close(m_fd);
-    //}
+    if (m_fd != -1) {
+        close(m_fd);
+    }
 #endif
 }
 
@@ -29,10 +30,19 @@ bool TPMLogger::initialize(void) {
 
 #ifndef WIN32
 
-    const char* fifo = "./fwtpm_pipe";
+    const char* fifo;
+
+    fifo = getParameter(m_sCfgFile.c_str(),"tpmPipe");
+
+    if (!fifo) {
+        printf("Error while reading pipe path from config file\n");
+        return false;
+     }
+
+    printf("Found TPM named pipe: %s\n", fifo);
 
     // Create the named pipe, read and write rights only for the owner
-    /*int result = mkfifo(fifo, S_IFIFO | S_IRUSR | S_IWUSR);
+    int result = mkfifo(fifo, S_IFIFO | S_IRUSR | S_IWUSR);
     if (-1 == result && EEXIST != errno) {
         perror("The creation of the named pipe failed!\n");
         return false;
@@ -42,7 +52,7 @@ bool TPMLogger::initialize(void) {
     if (-1 == m_fd) {
         perror("Unable to open the fifo for writing!\n");
         return false;
-    }*/
+    }
 
 #endif
 
@@ -52,7 +62,7 @@ bool TPMLogger::initialize(void) {
 bool TPMLogger::logMessage(const string& msg)
 {
 #ifndef WIN32
-    /*if (-1 == m_fd) {
+    if (-1 == m_fd) {
         return false;
     }
 
@@ -60,7 +70,7 @@ bool TPMLogger::logMessage(const string& msg)
         perror("Unable to write log message!");
         return false;
     }
-    */
+
     printf("Message '%s' was sent to TPM for logging!\n", msg.c_str());
 #endif
 

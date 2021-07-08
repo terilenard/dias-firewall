@@ -1,10 +1,12 @@
 #pragma once
 #include "BaseLogger.h"
+#include <string>
+
 
 class TPMLogger : public BaseLogger
 {
 public:
-	TPMLogger();
+	TPMLogger(const char* pszCfgFile);
 	virtual ~TPMLogger();
 
     virtual bool initialize(void);
@@ -12,4 +14,5 @@ public:
 
 private:
     int m_fd;
+    string m_sCfgFile;
 };

@@ -15,6 +15,7 @@ private:
 
 public:
 	RuleRunner();
+	RuleRunner(const bool usesTPM);
 	virtual ~RuleRunner();
 
 	int permitMessage(const int iMsgID, const unsigned char* pPayload, const int nPayloadSz);
@@ -29,4 +30,5 @@ private:
     list<STATEFW_CHINST> m_lstStateInst;
     BaseLogger* m_logger;
     std::string m_sLogMessage;
+    bool useTPM;
 };

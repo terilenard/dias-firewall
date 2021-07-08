@@ -5,9 +5,19 @@
 
 RuleRunner::RuleRunner()
 {
-    m_logger = new TPMLogger();
-    m_logger->initialize();
-    m_sLogMessage = "";
+
+}
+
+RuleRunner::RuleRunner(const bool usesTPM)
+{
+    useTPM = usesTPM;
+
+    if (useTPM)
+    {
+        m_logger = new TPMLogger("../diasfw.cfg");
+        m_logger->initialize();
+        m_sLogMessage = "";
+    }
 }
 RuleRunner::~RuleRunner()
 {
@@ -30,9 +40,11 @@ int RuleRunner::permitMessage(const int iMsgID, const unsigned char* pPayload, c
 	else if (FWCORE_PROC_DROP == stCode || FWCORE_PROC_DROP_LOG == stCode) {
 		retCode = stCode;
 	}
-
-	if ((FWCORE_PROC_PERMIT_LOG == retCode) || (FWCORE_PROC_DROP_LOG == retCode)) {
-		m_logger->logMessage(m_sLogMessage);
+	if (useTPM && m_logger)
+	{
+	    if ((FWCORE_PROC_PERMIT_LOG == retCode) || (FWCORE_PROC_DROP_LOG == retCode)) {
+			m_logger->logMessage(m_sLogMessage);
+	    }
 	}
 	if (FWCORE_PROC_CHAINUNDEFINED == retCode) {
 		// Make sure default action is returned

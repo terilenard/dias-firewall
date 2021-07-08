@@ -1,8 +1,9 @@
 #include "FirewallManager.h"
 #include "RuleRunner.h"
 #include "FWCore.h"
-#include <libconfig.h>
+#include "Config.h"
 #include <string>
+#include <cstring>
 using namespace std;
 
 FirewallManager::FirewallManager(const char* pszCfgFile):
@@ -27,13 +28,13 @@ bool FirewallManager::initialize(void)
 		return false;
 	}
 
-	m_pRuleRunner = new RuleRunner();
+	m_pRuleRunner = new RuleRunner(secureLog);
 
 	// Next, process the firewall rules
 	if (!m_pRuleRunner->initialise()) {
 		delete m_pRuleRunner;
 		m_pRuleRunner = NULL;
-		printf("Fw Rules processor\n");
+		printf("Rule Runner: Initialize Error\n");
 		return false;
 	}
 
@@ -41,7 +42,7 @@ bool FirewallManager::initialize(void)
 		m_pRuleRunner->destroy();
 		delete m_pRuleRunner;
 		m_pRuleRunner = NULL;
-		printf("Rule runner\n");
+		printf("Rule Runner: file parse Error\n");
 		return false;
 	}
 
@@ -62,33 +63,32 @@ void FirewallManager::destroy(void)
 
 bool FirewallManager::readConfigFile(void)
 {
-	config_t cfg;
 	const char* str;
+	int ret;
 
-	/*Initialization */
-	config_init(&cfg);
-
-	/* Read the file. If there is an error, report it and exit. */
-	if (!config_read_file(&cfg, m_sCfgFile.c_str()))
-	{
-		printf("\n%s:%d - %s", config_error_file(&cfg), config_error_line(&cfg), config_error_text(&cfg));
-		config_destroy(&cfg);
+	str = getParameter(m_sCfgFile.c_str(),"ruleFile");
+	
+	if (!str)
 		return false;
-	}
-
-	/* Get the configuration file name. */
-	if (!config_lookup_string(&cfg, "ruleFile", &str)) {
-		printf("Unable to find 'ruleFile' in configuration file\n");
-		config_destroy(&cfg);
-		return false;
-	}
+	printf("Config file was read successfully\n");
 
 	// Save the string and then destroy the context (also destroys allocated buffers!)
 	m_fwConfig.ruleFile = str;
 
-	config_destroy(&cfg);
-
 	printf("Found ruleFile = %s\n", m_fwConfig.ruleFile.c_str());
+
+	str = getParameter(m_sCfgFile.c_str(),"secureLog");
+
+	if (!str)
+		return false;
+
+	ret = strcmp(str,"true");
+	if (ret == 0)
+		secureLog = true;
+	else
+		secureLog = false;
+
+	printf("Secure Log option %s was read successfully\n", str);
 
 	return true;
 }
