@@ -16,7 +16,7 @@
 ## Sending Delay ##
 # Expressed in seconds
 
-LOG_FILE = "/var/log/dias-firewall/dfw.log"
+LOG_FILE = "/var/log/diasfw/dfw.log"
 PIPE_PATH = "/tmp/canfw_pipe"
 LISTENER_TYPE = 0
 
