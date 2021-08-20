@@ -98,7 +98,6 @@ class MQTTClient(object):
             for line in log_lines:
                 self._file_position = log_file.tell()
                 self._inst.publish("telemetry", str(line))
-                logger.info(line)
             time.sleep(0.1)
 
 
