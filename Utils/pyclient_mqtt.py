@@ -14,7 +14,7 @@ from pyc_logger import logger
 class MQTTClient(object):
 
 
-    def __init__(self, client_id, password, host, port, cafile):
+    def __init__(self, client_id, password, host, port, cafile, file_name):
         self._inst = mqtt.Client()
         self._inst.tls_set(cafile)
         self._inst.username_pw_set(client_id, password)
@@ -22,8 +22,11 @@ class MQTTClient(object):
         self._host = host
         self._port = port
         self._start_event = Event()
+        self._file_name = file_name
+        self._file_position = 0
 
     def connect(self):
+        self._load()
         self._inst.loop_start()
         self._inst.connect(self._host, self._port, 60)
 
@@ -33,6 +36,7 @@ class MQTTClient(object):
             self._inst.loop_stop()
             self._inst.disconnect()
             logger.info("Client disconnected.")
+            self._dump()
 
     def _on_connect(self, client, userdata, flags, rc):
 
@@ -44,15 +48,58 @@ class MQTTClient(object):
             logger.info("Client tries reconnect...")
             self._inst.reconnect()
 
+
+    def _tail(self, log_file):
+
+        try:
+            while self._inst.is_connected():
+                line = log_file.readline()
+
+                if not line or not line.endswith('\n'):
+                    time.sleep(0.1)
+                    continue
+                yield line
+        except (OSError, KeyboardInterrupt) as ex:
+            logger.error(str(ex))
+            self.stop()
+
+
+    def _load(self):
+        try:
+            with open("log_cache", "r") as log_cache:
+                self._file_position = int(log_cache.readline())
+        except OSError as ex:
+            logger.error(str(ex))
+
+    def _dump(self):
+        try:
+            with open("log_cache", "w") as log_cache:
+                log_cache.write(str(self._file_position))
+        except OSError as ex:
+            logger.error(str(ex))
+
     def push(self):
         logger.info("Wainting for connection to {}:{}.".format(self._host, self._port))
+
         self._start_event.wait()
 
-       # TODO: read data and publish it
-        while True:
-            self._inst.publish("telemetry", "{\"test\": 2}")
-            logger.info("Published data")
-            time.sleep(1)
+        log_file = None
+
+        try:
+            log_file = open(self._file_name)
+            log_file.seek(int(self._file_position))
+
+        except OSError as ex:
+            logger.error(str(ex))
+            self._dump()
+
+        while self._inst.is_connected():
+            log_lines = self._tail(log_file)
+            for line in log_lines:
+                self._file_position = log_file.tell()
+                self._inst.publish("telemetry", str(line))
+                logger.info(line)
+            time.sleep(0.1)
 
 
 if __name__ == "__main__":
@@ -66,10 +113,10 @@ if __name__ == "__main__":
     parser.add_argument("--port", type=int, help="Remote MQTT port of Bosch IoT Hub. Usually is 8883.")
     parser.add_argument("--cafile", type=str, help="Path to the ca file obtained from Bosch IoT Hub. If you don't have it, get it using: "
                         "curl -o iothub.crt https://docs.bosch-iot-suite.com/hub/iothub.crt .")
-
+    parser.add_argument("--log_file", type=str, help="Log file to be monitored. New lines in the log file will be publish via MQTT to Bosch IoT Hub.")
     args = parser.parse_args()
 
-    client = MQTTClient(args.client_id, args.password, args.host, args.port, args.cafile)
+    client = MQTTClient(args.client_id, args.password, args.host, args.port, args.cafile, args.log_file)
 
     atexit.register(lambda: client.stop)
 
