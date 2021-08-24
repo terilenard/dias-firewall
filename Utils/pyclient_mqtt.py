@@ -68,8 +68,8 @@ class MQTTClient(object):
         try:
             with open("log_cache", "r") as log_cache:
                 self._file_position = int(log_cache.readline())
-        except OSError as ex:
-            logger.error(str(ex))
+        except FileNotFoundError as ex:
+            pass
 
     def _dump(self):
         try:
