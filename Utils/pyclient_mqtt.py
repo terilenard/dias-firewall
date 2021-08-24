@@ -96,7 +96,7 @@ class MQTTClient(object):
         while self._inst.is_connected():
             log_lines = self._tail(log_file)
             for line in log_lines:
-                if line.stratswith("Secure Logging"):
+                if line.startswith("Secure Logging"):
                     self._file_position = log_file.tell()
                     self._inst.publish("telemetry", str(line))
                 continue
