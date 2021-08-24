@@ -1,12 +1,12 @@
 #!/usr/bin/env python3 
 import time
-import atexit
+import signal
 
 from argparse import ArgumentParser
 from threading import Event
 import paho.mqtt.client as mqtt
 
-from pyc_logger import logger
+from pycan import *
 
 # Dependencies
 # pip3 install paho-mqtt
@@ -66,14 +66,14 @@ class MQTTClient(object):
 
     def _load(self):
         try:
-            with open("log_cache", "r") as log_cache:
+            with open("/var/cache/logpublisher/log_cache", "r") as log_cache:
                 self._file_position = int(log_cache.readline())
         except FileNotFoundError as ex:
             pass
 
     def _dump(self):
         try:
-            with open("log_cache", "w") as log_cache:
+            with open("/var/cache/logpublisher/log_cache", "w") as log_cache:
                 log_cache.write(str(self._file_position))
         except OSError as ex:
             logger.error(str(ex))
@@ -98,10 +98,18 @@ class MQTTClient(object):
             for line in log_lines:
                 if line.startswith("Secure Logging"):
                     self._file_position = log_file.tell()
-                    self._inst.publish("telemetry", str(line))
-                continue
+                    self._inst.publish("telemetry", "{\"log\":"+ str(line)+"}")
+                #continue
             time.sleep(0.1)
 
+
+def exit_handler(signum, frame):
+    global client
+
+    if client:
+        client.stop()
+
+client = None
 
 if __name__ == "__main__":
 
@@ -119,7 +127,7 @@ if __name__ == "__main__":
 
     client = MQTTClient(args.client_id, args.password, args.host, args.port, args.cafile, args.log_file)
 
-    atexit.register(lambda: client.stop)
+    signal.signal(signal.SIGTERM, exit_handler)
 
     try:
         client.connect()
