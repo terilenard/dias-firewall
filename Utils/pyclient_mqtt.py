@@ -1,6 +1,7 @@
 #!/usr/bin/env python3 
 import time
 import signal
+import json
 
 from argparse import ArgumentParser
 from threading import Event
@@ -98,8 +99,8 @@ class MQTTClient(object):
             for line in log_lines:
                 if line.startswith("Secure Logging"):
                     self._file_position = log_file.tell()
-                    self._inst.publish("telemetry", "{\"log\":"+ str(line)+"}")
-                #continue
+                    data = {"log": line.strip()}
+                    self._inst.publish("telemetry", json.dumps(data))
             time.sleep(0.1)
 
 
