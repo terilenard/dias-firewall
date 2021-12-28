@@ -1,6 +1,8 @@
 #pragma once
+#include "FrequencyProcessor.h"
 #include "RuleFileProcessor.h"
 #include <string>
+#include <thread>
 
 class BaseLogger;
 
@@ -15,10 +17,10 @@ private:
 
 public:
 	RuleRunner();
-	RuleRunner(const bool usesTPM);
+	RuleRunner(const bool usesTPM, const bool usesFreqProc, const bool usesFreqNotifier, const int notifierTimer);
 	virtual ~RuleRunner();
 
-	int permitMessage(const int iMsgID, const unsigned char* pPayload, const int nPayloadSz);
+	int permitMessage(const int iMsgID, const unsigned char* pPayload, const int nPayloadSz, const long timestamp);
 
 private:
 	int permitRuleChain(const int iMsgID, const unsigned char* pPayload, const int nPayloadSz);
@@ -30,5 +32,7 @@ private:
     list<STATEFW_CHINST> m_lstStateInst;
     BaseLogger* m_logger;
     std::string m_sLogMessage;
-    bool useTPM;
+    bool useTPM, useFreqProc, useFreqNotifier;
+    FrequencyProcessor* fp;
+	thread th;
 };

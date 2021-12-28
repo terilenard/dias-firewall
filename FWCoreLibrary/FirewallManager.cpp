@@ -1,3 +1,4 @@
+#include "FrequencyProcessor.h"
 #include "FirewallManager.h"
 #include "RuleRunner.h"
 #include "FWCore.h"
@@ -28,7 +29,7 @@ bool FirewallManager::initialize(void)
 		return false;
 	}
 
-	m_pRuleRunner = new RuleRunner(secureLog);
+	m_pRuleRunner = new RuleRunner(secureLog, usesFreqProc, usesFreqNotifier, notifierTimer);
 
 	// Next, process the firewall rules
 	if (!m_pRuleRunner->initialise()) {
@@ -48,6 +49,7 @@ bool FirewallManager::initialize(void)
 
 	m_pRuleRunner->printRules();
 	printf("Printing Rules\n");
+
 	return true;
 }
 
@@ -90,10 +92,54 @@ bool FirewallManager::readConfigFile(void)
 
 	printf("Secure Log option %s was read successfully\n", str);
 
+		// Read the freq processor option
+	str = getParameter(m_sCfgFile.c_str(),"usesFreqProc");
+
+	if (!str)
+		return false;
+
+	ret = strcmp(str,"true");
+	if (ret == 0)
+		usesFreqProc = true;
+	else
+		usesFreqProc = false;
+
+	printf("Frequency Processor option %s was read successfully\n", str);
+
+	// Read the freq notifier option (thread)
+	str = getParameter(m_sCfgFile.c_str(),"usesFreqNotifier");
+
+	if (!str)
+		return false;
+
+	ret = strcmp(str,"true");
+	if (ret == 0)
+		usesFreqNotifier = true;
+	else
+		usesFreqNotifier = false;
+
+	printf("Frequency Notifier option %s was read successfully\n", str);
+
+	// Read the freq notifier timer(thread)
+	str = getParameter(m_sCfgFile.c_str(),"notifierTimer");
+
+	if (!str)
+		return false;
+
+	try
+	{
+		notifierTimer = stoi(str);
+	}
+	catch (...) {
+		return false;
+	}
+
+	printf("Frequency Notifier Timer %s was read successfully\n", str);
+	
 	return true;
 }
 
-int FirewallManager::permitMessage(const int iMsgID, const unsigned char* pPayload, const int nPayloadSz)
+int FirewallManager::permitMessage(const int iMsgID, const unsigned char* pPayload, const int nPayloadSz, const long timestamp)
 {
-	return m_pRuleRunner->permitMessage(iMsgID, pPayload, nPayloadSz);
+	return m_pRuleRunner->permitMessage(iMsgID, pPayload, nPayloadSz, timestamp);
 }

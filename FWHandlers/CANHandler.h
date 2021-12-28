@@ -12,7 +12,7 @@ public:
     CANHandler(const char* pszCfgFile);
     virtual ~CANHandler();
 
-    bool initialize(void(*callback)(int idx, unsigned char* payload, void* arg, int dlc), void* arg);
+    bool initialize(void(*callback)(int idx, unsigned char* payload, void* arg, int dlc, long timestamp), void* arg);
     bool runHandler(void);
 
 private:
@@ -21,7 +21,7 @@ private:
     struct pollfd m_poll;
 #endif
 
-    void (*m_callback)(int idx, unsigned char* payload, void* arg, int dlc);
+    void (*m_callback)(int idx, unsigned char* payload, void* arg, int dlc, long timestamp);
     void* m_arg;
     string m_sCfgFile;
 };

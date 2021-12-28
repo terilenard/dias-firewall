@@ -1,6 +1,7 @@
 #include "CANHandler.h"
 #include "../FWCoreLibrary/Config.h"
 #include <string>
+#include <sys/time.h>
 
 #ifndef WIN32
 #include <sys/types.h>
@@ -35,7 +36,7 @@ CANHandler::~CANHandler()
 #endif
 }
 
-bool CANHandler::initialize(void (*callback)(int idx, unsigned char* payload, void* arg, int dlc), void* arg)
+bool CANHandler::initialize(void (*callback)(int idx, unsigned char* payload, void* arg, int dlc, long timestamp), void* arg)
 {
     m_callback = callback;
     m_arg = arg;
@@ -76,11 +77,13 @@ bool CANHandler::initialize(void (*callback)(int idx, unsigned char* payload, vo
 
 bool CANHandler::runHandler(void)
 {
+    long timestamp;
     unsigned int idx;
     unsigned char tidx[4];
     unsigned char dlc[1];
     unsigned char payload[8];
-    int sdlc;
+    int sdlc = 0;
+  
 
 #ifndef WIN32
 
@@ -94,23 +97,38 @@ bool CANHandler::runHandler(void)
     }
 
     // Read CAN ID and payload
-    if (read(m_poll.fd, tidx, 4) < 4) {
+    int k = read(m_poll.fd, tidx, 4);
+    if (k < 4) {
+	printf("Error reading %d CAN ID\n", k);
         return false;
     }
 
-    if (read(m_poll.fd, dlc, 1) < 1) {
+    k =  read(m_poll.fd, dlc, 1);
+    if (k < 1) {
+	printf("Error reading %d DLC\n",k );
+	fflush(stdout);
         return false;
     }
+
     // Convert the DLC to int
     std::memcpy(&sdlc, dlc, sizeof dlc);
 
-    if (read(m_poll.fd, payload, sdlc) < sdlc) {
+    k =  read(m_poll.fd, payload, sdlc);
+    if (k < sdlc) {
+	printf("Error reading %d != %d payload\n", k, sdlc);
+	fflush(stdout);
         return false;
     }
+
     idx = (tidx[0] << 24) | (tidx[1] << 16) | (tidx[2] << 8) | tidx[3];
 
+    // Get the timestamp
+    struct timeval curTime;
+	gettimeofday(&curTime, NULL);
+	timestamp = (curTime.tv_sec) * 1000 + (curTime.tv_usec) / 1000 ;
+
     // Now fire the callback
-    m_callback( (int)idx, payload, m_arg, sdlc );
+    m_callback( (int)idx, payload, m_arg, sdlc, timestamp );
 
 #endif
 

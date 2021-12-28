@@ -17,10 +17,10 @@ then
 
     cd ..
 
-    g++ -shared Bin/*.o -o Lib/libfwcore.so
+    g++ -shared Bin/*.o -o /usr/lib/libfwcore.so
 
 
-    g++ ../FWHandlers/*.cpp Lib/libfwcore.so -lexpat -lconfig -o DiasFirewall
+    g++ ../FWHandlers/*.cpp /usr/lib/libfwcore.so -lexpat -lconfig -pthread -o DiasFirewall
 
 
     cd ..

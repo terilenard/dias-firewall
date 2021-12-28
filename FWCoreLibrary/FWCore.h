@@ -24,8 +24,13 @@
 #define FWCORE_PROC_DROP_LOG 4
 #define FWCORE_PROC_CHAINUNDEFINED 5
 
+
+#define FWCORE_FREQ_OK 6
+#define FWCORE_FREQ_BAD 7
+#define FWCORE_FREQ_ERROR 8
+
 // FW Core API
 FWCORE_API int createFWInstance(const char* pszCfgFile);
 FWCORE_API int destroyFWInstance(int iFwInstance);
-FWCORE_API int processMessage(int iFwInstance, const int iMsgIdx, const unsigned char* pPayload, const int nPayloadSz);
+FWCORE_API int processMessage(int iFwInstance, const int iMsgIdx, const unsigned char* pPayload, const int nPayloadSz, const long timestamp);
 FWCORE_API int getLastError(void);

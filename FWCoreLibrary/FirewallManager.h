@@ -18,7 +18,7 @@ public:
 public:
 	bool initialize(void);
 	void destroy(void);
-	int permitMessage(const int iMsgID, const unsigned char* pPayload, const int nPayloadSz);
+	int permitMessage(const int iMsgID, const unsigned char* pPayload, const int nPayloadSz, const long timestamp);
 
 private:
 	bool readConfigFile(void);
@@ -28,5 +28,8 @@ private:
 	FWCONFIG m_fwConfig;
 	string m_sCfgFile;
 	bool secureLog;
+	bool usesFreqProc;
+	bool usesFreqNotifier;
+	int notifierTimer = 0;
 };
 

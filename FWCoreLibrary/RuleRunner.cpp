@@ -2,29 +2,45 @@
 #include "ExpressionTree.h"
 #include "FWCore.h"
 #include "TPMLogger.h"
+#include <iostream>
+#include <thread>
 
 RuleRunner::RuleRunner()
 {
 
 }
 
-RuleRunner::RuleRunner(const bool usesTPM)
+RuleRunner::RuleRunner(const bool usesTPM, const bool usesFreqProc, const bool usesFreqNotifier, const int notifierTimer)
 {
     useTPM = usesTPM;
+	useFreqProc = usesFreqProc;
+	useFreqNotifier = usesFreqNotifier;
 
     if (useTPM)
     {
-        m_logger = new TPMLogger("../diasfw.cfg");
+        m_logger = new TPMLogger("/etc/diasfw/diasfw.cfg");
         m_logger->initialize();
         m_sLogMessage = "";
     }
+	if (useFreqProc)
+	{
+		fp = new FrequencyProcessor("/etc/diasfw/FreqRules.in", m_logger, notifierTimer);
+		if (useFreqNotifier)
+		{
+			fp->initNotifier();
+			//thread th(&FrequencyProcessor::frequencyNotifier, &fp);
+		}
+	}
+	
 }
 RuleRunner::~RuleRunner()
 {
     delete m_logger;
+	delete fp;
+
 }
 
-int RuleRunner::permitMessage(const int iMsgID, const unsigned char* pPayload, const int nPayloadSz)
+int RuleRunner::permitMessage(const int iMsgID, const unsigned char* pPayload, const int nPayloadSz, const long timestamp)
 {
     // Reset log message
     m_sLogMessage = "N/A";
@@ -34,17 +50,61 @@ int RuleRunner::permitMessage(const int iMsgID, const unsigned char* pPayload, c
 
 	// Then, look through the state chain
 	int stCode = permitStateChain(iMsgID, pPayload, nPayloadSz);
+
+	// ### DEBUG ROLAND ### //
+	// cout << iMsgID << " " << timestamp << " " << endl;
+	// cout << frCode << endl;
+
+	int frCode;
+
+	if (useFreqProc)
+	{
+		frCode = fp->processNewID(iMsgID, timestamp);
+	}
+	
+	if (frCode == FWCORE_FREQ_ERROR)
+	{
+		printf("Frequency Processor Error!");
+	}
+
 	if (FWCORE_PROC_CHAINUNDEFINED == retCode) {
 		retCode = stCode;
 	}
+
 	else if (FWCORE_PROC_DROP == stCode || FWCORE_PROC_DROP_LOG == stCode) {
 		retCode = stCode;
 	}
+
 	if (useTPM && m_logger)
 	{
 	    if ((FWCORE_PROC_PERMIT_LOG == retCode) || (FWCORE_PROC_DROP_LOG == retCode)) {
 			m_logger->logMessage(m_sLogMessage);
 	    }
+
+		if (useFreqProc)
+			{
+				if (frCode == FWCORE_FREQ_BAD)
+				{
+					m_logger->logMessage("Frequency out of range for CID: " + to_string(iMsgID));
+				}
+		}
+
+	}
+	else 
+	{
+		if ((FWCORE_PROC_PERMIT_LOG == retCode) || (FWCORE_PROC_DROP_LOG == retCode))
+	    {
+			printf("Secure Logging: ");
+	    	std::cout<<m_sLogMessage<<std::endl;
+		}
+		if (useFreqProc)
+		{
+			if (frCode == FWCORE_FREQ_BAD)
+			{
+				cout<<"Secure Logging: ";
+				std::cout<<"Frequency out of range for CID: " + to_string(iMsgID)<<std::endl;
+			}
+		}
 	}
 	if (FWCORE_PROC_CHAINUNDEFINED == retCode) {
 		// Make sure default action is returned
@@ -156,4 +216,9 @@ void RuleRunner::checkStatefulInit(void)
 
 		m_lstStateInst.push_back(inst);
 	}
+}
+
+void displayMessage(string message)
+{
+	cout << message << " " << endl;
 }
