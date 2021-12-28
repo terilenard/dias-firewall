@@ -17,11 +17,13 @@ then
 
     cd ..
 
-    g++ -shared Bin/*.o -o /usr/lib/libfwcore.so
+    g++ -shared Bin/*.o -o Lib/libfwcore.so
 
+    sudo cp Lib/libfwcore.so /usr/lib/libfwcore.so
+
+    sudo chown $USER:$USER /usr/lib/libfwcore.so
 
     g++ ../FWHandlers/*.cpp /usr/lib/libfwcore.so -lexpat -lconfig -pthread -o DiasFirewall
-
 
     cd ..
 fi
