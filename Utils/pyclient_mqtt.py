@@ -97,10 +97,10 @@ class MQTTClient(object):
         while self._inst.is_connected():
             log_lines = self._tail(log_file)
             for line in log_lines:
-                if line.startswith("Secure Logging"):
-                    self._file_position = log_file.tell()
-                    data = {"log": line.strip()}
-                    self._inst.publish("telemetry", json.dumps(data))
+                self._file_position = log_file.tell()
+                data = {"log": line.strip()}
+                print(str(data))
+                self._inst.publish("telemetry", json.dumps(data))
             time.sleep(0.1)
 
 
