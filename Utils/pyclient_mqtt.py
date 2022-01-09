@@ -7,7 +7,7 @@ from argparse import ArgumentParser
 from threading import Event
 import paho.mqtt.client as mqtt
 
-from pycan import *
+# from pyc_logger import logger
 
 # Dependencies
 # pip3 install paho-mqtt
@@ -32,21 +32,21 @@ class MQTTClient(object):
         self._inst.connect(self._host, self._port, 60)
 
     def stop(self):
-        logger.info("Stopping client...")
+        # logger.info("Stopping client...")
         if self._inst.is_connected():
             self._inst.loop_stop()
             self._inst.disconnect()
-            logger.info("Client disconnected.")
+            # logger.info("Client disconnected.")
             self._dump()
 
     def _on_connect(self, client, userdata, flags, rc):
 
         if rc == 0:
-            logger.info("Client connected " + str(rc))
+            # logger.info("Client connected " + str(rc))
             self._start_event.set()
         else:
-            logger.error("Client couldn't connect. Received code: {}.".format(rc))
-            logger.info("Client tries reconnect...")
+            # logger.error("Client couldn't connect. Received code: {}.".format(rc))
+            # logger.info("Client tries reconnect...")
             self._inst.reconnect()
 
 
@@ -61,7 +61,7 @@ class MQTTClient(object):
                     continue
                 yield line
         except (OSError, KeyboardInterrupt) as ex:
-            logger.error(str(ex))
+            # logger.error(str(ex))
             self.stop()
 
 
@@ -77,10 +77,11 @@ class MQTTClient(object):
             with open("/var/cache/logpublisher/log_cache", "w") as log_cache:
                 log_cache.write(str(self._file_position))
         except OSError as ex:
-            logger.error(str(ex))
+            # logger.error(str(ex))
+            return
 
     def push(self):
-        logger.info("Wainting for connection to {}:{}.".format(self._host, self._port))
+        # logger.info("Wainting for connection to {}:{}.".format(self._host, self._port))
 
         self._start_event.wait()
 
@@ -91,7 +92,7 @@ class MQTTClient(object):
             log_file.seek(int(self._file_position))
 
         except OSError as ex:
-            logger.error(str(ex))
+            # logger.error(str(ex))
             self._dump()
 
         while self._inst.is_connected():
@@ -99,7 +100,7 @@ class MQTTClient(object):
             for line in log_lines:
                 self._file_position = log_file.tell()
                 data = {"log": line.strip()}
-                print(str(data))
+                # print(str(data))
                 self._inst.publish("telemetry", json.dumps(data))
             time.sleep(0.1)
 

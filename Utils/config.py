@@ -21,16 +21,16 @@ PIPE_PATH = "/tmp/canfw_pipe"
 LISTENER_TYPE = 0
 
 # Not used
-SENDING_DELAY = 0.2
-SENDING_TYPE = 0
+#SENDING_DELAY = 0.2
+#SENDING_TYPE = 0
 
 # Not used
-SENDING_DEMO = 1
-SENDING_DELAY_DM1 = 1
+#SENDING_DEMO = 1
+#SENDING_DELAY_DM1 = 1
 
 # The module listens for frames on the REC channel and forwards them to the SEND channel.
-CAN_CHANNEL_SEND = 'vcan0'
-CAN_CHANNEL_REC = 'can0'
+#CAN_CHANNEL_SEND = 'vcan0'
+CAN_CHANNEL_REC = 'vcan0'
 
 # Internal Logging
 LOGFILE = "pycan.log"

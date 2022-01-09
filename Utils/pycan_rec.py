@@ -10,7 +10,7 @@ from pyc_logger import logger
 from config import *
 
 
-def listen_and_send(canbus, vcanbus, pipeout, listener_type):
+def listen_and_send(canbus, pipeout, listener_type):
 
     listener = setup_listener(listener_type, LOG_FILE)
     notifier = setup_notifier(listener)
@@ -21,8 +21,7 @@ def listen_and_send(canbus, vcanbus, pipeout, listener_type):
         while True:
             msg = canbus.recv(1)
 
-            if (msg):
-               send_message_on_can(vcanbus, msg)
+            if msg:
                send_message_on_pipe(pipeout, msg)
 
     except KeyboardInterrupt:
@@ -37,18 +36,16 @@ def listen_and_send(canbus, vcanbus, pipeout, listener_type):
          if listener:
              notifier.stop()
          canbus.shutdown()
-         vcanbus.shutdown()
 
 
 def main():
 
-    canbus = setup_bus(CAN_CHANNEL_REC)
-    vcanbus = setup_bus(CAN_CHANNEL_SEND)
+    can_bus = setup_bus(CAN_CHANNEL_REC)
 
     pipeout = create_pipe(PIPE_PATH)
 
-    if (canbus and vcanbus and pipeout):
-        listen_and_send(canbus, vcanbus, pipeout, LISTENER_TYPE)
+    if can_bus and pipeout:
+        listen_and_send(can_bus, pipeout, LISTENER_TYPE)
 
 if __name__ == "__main__":
 
