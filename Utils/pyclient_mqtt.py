@@ -7,7 +7,7 @@ from argparse import ArgumentParser
 from threading import Event
 import paho.mqtt.client as mqtt
 
-# from pyc_logger import logger
+from pycan import *
 
 # Dependencies
 # pip3 install paho-mqtt

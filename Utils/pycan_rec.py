@@ -4,11 +4,10 @@ import can
 import time
 import struct
 import os, sys, traceback
-from pycan_com import *
-from pycan_msg import *
-from pyc_logger import logger
-from config import *
+from pycan import *
 
+sys.path.insert(0, '/etc/diasfw/')
+from config import *
 
 def listen_and_send(canbus, pipeout, listener_type):
 

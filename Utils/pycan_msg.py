@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import can
-from pyc_logger import logger
+from .pyc_logger import logger
 
 def setup_listener(type, log_file):
     ### Writing recieved messages to FILE ###

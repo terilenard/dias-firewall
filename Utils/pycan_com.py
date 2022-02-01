@@ -2,8 +2,8 @@
 
 import can
 import time, os
-from pycan_msg import *
-from pyc_logger import logger
+from .pycan_msg import *
+from .pyc_logger import logger
 
 def setup_bus(channel):
     logger.debug("Setting up BUS: " + channel)
@@ -20,12 +20,13 @@ def create_pipe(pipe_path):
     logger.debug("Opening PIPE: " + pipe_path)
 
     if os.path.exists(pipe_path):
-        os.remove(pipe_path)
-        os.mkfifo(pipe_path)
+        pipeout = os.open(pipe_path, os.O_WRONLY)
+        #os.remove(pipe_path)
+        #os.mkfifo(pipe_path)
     else:
         os.mkfifo(pipe_path)
+        pipeout = os.open(pipe_path, os.O_WRONLY)
 
-    pipeout = os.open(pipe_path, os.O_WRONLY)
     return pipeout
 
 def send_message_on_pipe(pipeout, msg):
@@ -35,6 +36,7 @@ def send_message_on_pipe(pipeout, msg):
     d = os.write(pipeout, sent_msg)
     ts = time.time()
     print(str(ts) , " Sent : " + str(d) + " bytes. Payload: " + str(sent_msg))
+    logger.debug("Sending frame to FW")
 
 def send_message_on_can(bus, msg):
     bus.send(msg)
