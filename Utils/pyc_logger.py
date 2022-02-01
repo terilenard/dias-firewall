@@ -1,6 +1,8 @@
 import logging
-from config import LOGFILE,LOGLEVEL
 
+import sys
+sys.path.insert(0, '/etc/diasfw/')
+from config import LOGFILE,LOGLEVEL
 
 levels = {
     'critical': logging.CRITICAL,
