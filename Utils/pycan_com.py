@@ -35,8 +35,7 @@ def send_message_on_pipe(pipeout, msg):
 
     d = os.write(pipeout, sent_msg)
     ts = time.time()
-    print(str(ts) , " Sent : " + str(d) + " bytes. Payload: " + str(sent_msg))
-    logger.debug("Sending frame to FW")
+    logger.debug("{} Sent : {} bytes. Payload: {}".format(str(ts), str(d), str(sent_msg)))
 
 def send_message_on_can(bus, msg):
     bus.send(msg)
