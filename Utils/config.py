@@ -33,5 +33,5 @@ LISTENER_TYPE = 0
 CAN_CHANNEL_REC = 'vcan0'
 
 # Internal Logging
-LOGFILE = "pycan.log"
+LOGFILE = "/var/log/diasfw/pycan.log"
 LOGLEVEL = "DEBUG"
