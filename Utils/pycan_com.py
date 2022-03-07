@@ -9,7 +9,7 @@ def setup_bus(channel):
     logger.debug("Setting up BUS: " + channel)
 
     try:
-        bus = can.interface.Bus(channel=channel, bustype='socketcan_native')
+        bus = can.interface.Bus(channel=channel, bustype='socketcan')
         return bus
 
     except Exception as ex:
