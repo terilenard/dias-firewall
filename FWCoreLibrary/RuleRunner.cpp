@@ -86,7 +86,7 @@ int RuleRunner::permitMessage(const int iMsgID, const unsigned char* pPayload, c
 			{
 				if (frCode == FWCORE_FREQ_BAD)
 				{
-					m_logger->logMessage("Frequency out of range for CID: " + to_string(iMsgID));
+					m_logger->logMessage("Frequency out of range for CAN ID: " + to_string(iMsgID))+ " timestamp: " + std::to_string(timestamp) + "\n";
 				}
 		}
 
