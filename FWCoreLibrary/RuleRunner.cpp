@@ -43,7 +43,7 @@ RuleRunner::~RuleRunner()
 int RuleRunner::permitMessage(const int iMsgID, const unsigned char* pPayload, const int nPayloadSz, const long timestamp)
 {
     // Reset log message
-    m_sLogMessage = "Illegal CAN ID: " + std::to_string(iMsgID) + " timestamp: " + std::to_string(timestamp);
+    m_sLogMessage = "Found illegal CAN ID: " + std::to_string(iMsgID) + " timestamp: " + std::to_string(timestamp) + "\n";
 
 	// First, look through rule chain
 	int retCode = permitRuleChain(iMsgID, pPayload, nPayloadSz);
@@ -68,7 +68,8 @@ int RuleRunner::permitMessage(const int iMsgID, const unsigned char* pPayload, c
 	}
 
 	if (FWCORE_PROC_CHAINUNDEFINED == retCode) {
-		retCode = stCode;
+		 m_logger->logMessage(m_sLogMessage);                                                                                   +               
+	         return FWCORE_PROC_DROP_LOG; 
 	}
 
 	else if (FWCORE_PROC_DROP == stCode || FWCORE_PROC_DROP_LOG == stCode) {
@@ -154,7 +155,7 @@ int RuleRunner::permitRuleChain(const int iMsgID, const unsigned char* pPayload,
 
 int RuleRunner::permitStateChain(const int iMsgID, const unsigned char* pPayload, const int nPayloadSz)
 {
-	int retState = FWCORE_PROC_DROP_LOG; // default
+	int retState = FWCORE_PROC_PERMIT; // default
 
 	// Make sure data structures are loaded - only done the first time the method is called
 	checkStatefulInit();
