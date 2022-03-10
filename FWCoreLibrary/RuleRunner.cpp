@@ -68,7 +68,7 @@ int RuleRunner::permitMessage(const int iMsgID, const unsigned char* pPayload, c
 	}
 
 	if (FWCORE_PROC_CHAINUNDEFINED == retCode) {
-		 m_logger->logMessage(m_sLogMessage);                                                                                   +               
+		 m_logger->logMessage(m_sLogMessage);        
 	         return FWCORE_PROC_DROP_LOG; 
 	}
 
