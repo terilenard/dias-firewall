@@ -49,7 +49,7 @@ int main()
     while(!g_exit)
     {
 	 hCAN.runHandler();
-	 usleep(10000);
+	 //usleep(10000);
     }
 
     printf("Real time CAN exiting ...\n");
@@ -61,12 +61,12 @@ void CAN_callback(int idx, unsigned char* payload, void* arg, int dlc, long time
 {
     int fwInst = *(int*)arg;
 
-    printf("Received CAN frame with idx: %d, payload: ", idx);
-    for (int i = 0 ; i < dlc ; ++i) {
-        printf("%X ", payload[i]);
-    }
-    printf("\n");
+    //printf("Received CAN frame with idx: %d, payload: ", idx);
+    //for (int i = 0 ; i < dlc ; ++i) {
+    //    printf("%X ", payload[i]);
+    //}
+    //printf("\n");
 
     processMessage(fwInst, idx, payload, dlc, timestamp);
-    fflush(stdout);
+    //fflush(stdout);
 }

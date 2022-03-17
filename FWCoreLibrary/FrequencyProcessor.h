@@ -23,7 +23,7 @@ private:
 	BaseLogger * logobj;
 
 	map<int, tuple<int, int, int> > idFrequencyMap;
-	map<int, int> idTimestampMap;
+	map<unsigned long, unsigned long> idTimestampMap;
 	map<int, tuple<int, int, int>>::iterator mapitterator;
 	bool thReady = 0;
 	thread my_thread_;

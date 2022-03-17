@@ -57,7 +57,7 @@ int FrequencyProcessor::processNewID(const int ID, const long timestamp)
 					 - If the ID exists in the ID Freqnecy structure but has not yet been seen, save the current timestamp
 						*/
 
-	int currFreq;
+	unsigned long currFreq;
 	tuple<int, int, int> definedFreq;
 
 	mapitterator = idFrequencyMap.find(ID);
@@ -78,12 +78,15 @@ int FrequencyProcessor::processNewID(const int ID, const long timestamp)
 			// Compute the current time diff
 			mtx.lock();
 			currFreq = timestamp - idTimestampMap.find(ID)->second;
-			definedFreq = idFrequencyMap.at(ID);
 
 			// Update the timestamp for this ID
 			idTimestampMap.at(ID) = timestamp;
 			mtx.unlock();
 
+			definedFreq = idFrequencyMap.at(ID);
+			//std::cout<<"@@@@@@@@ " <<  ID << " " << currFreq << std::endl;
+
+			//std::cout<<"@@@@@@@@@ "<< timestamp << " - " << idTimestampMap.find(ID)->second << std::endl;
 			return verifyFrequency(currFreq, definedFreq);
 		}
 		return 0;
@@ -111,15 +114,15 @@ int FrequencyProcessor::verifyFrequency(const int currFreq, tuple<int, int, int>
 	int lowThreshold, actualFreq, highThreshold;
 	tie(lowThreshold, actualFreq, highThreshold) = definedFreq;
 
-	if (lowThreshold <= currFreq && currFreq <= actualFreq)
+	if (lowThreshold <= currFreq && currFreq <= highThreshold)
 	{
 		return FWCORE_FREQ_OK;
 	}
-	else if (actualFreq < currFreq && currFreq <= highThreshold)
-	{
-		return FWCORE_FREQ_OK;
-	}
-
+	//else if (actualFreq < currFreq && currFreq <= highThreshold)
+	//{
+	//	return FWCORE_FREQ_OK;
+	//}
+	std::cout<<lowThreshold<< "-" << currFreq << " - " << highThreshold<<std::endl;
 	return FWCORE_FREQ_BAD;
 }
 
@@ -190,8 +193,8 @@ error:
 void FrequencyProcessor::frequencyNotifier()
 {
 	struct timeval current_time;
-	long duration = 0, delay = 0;
-	map <int, int>::iterator it;
+	unsigned long duration = 0, delay = 0;
+	map <unsigned long, unsigned long>::iterator it;
 	stringstream message;
 
 
@@ -201,8 +204,13 @@ void FrequencyProcessor::frequencyNotifier()
 		if (thReady == 1)
 		{
 			// Get current time
+			unsigned long millis = 0;
+			unsigned long seconds = 0;
 			gettimeofday(&current_time, NULL);
-			duration = (current_time.tv_sec) * 1000 + (current_time.tv_usec) / 1000 ;
+
+			seconds = (current_time.tv_sec % 100000) * 1000;
+			millis = (current_time.tv_usec / 1000);
+			duration = seconds + millis ;
 
 			mtx.lock();
 			it = idTimestampMap.begin();
@@ -211,9 +219,14 @@ void FrequencyProcessor::frequencyNotifier()
 			{
 				delay = duration - it->second;
 
-				if ((duration - it->second) > notifierTimer * 1000)
+				if ((duration - it->second) > (notifierTimer * 1000))
 				{
-					message << "Frame: " << it->first << " not recieved for: " << delay << "ms\n";
+					message.clear();
+					message.str(string());
+					message << "Frame not recieved for: " << delay << "ms CAN ID: " << it->first <<" ." << std::endl;
+					logobj->logMessage(message.str());
+					it ->second = 0;
+					thReady = 0;
 				}
 				it++;
 			}
@@ -221,11 +234,7 @@ void FrequencyProcessor::frequencyNotifier()
 
 			if (message.rdbuf()->in_avail() != 0)
 			{
-				if (logobj != NULL)
-				{
-					logobj->logMessage(message.str());
-				}
-				else
+				if (logobj == NULL)
 				{
 					cout<<"Secure Logging: ";
 					std::cout<<message.str()<<std::endl;

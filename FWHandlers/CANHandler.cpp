@@ -2,6 +2,7 @@
 #include "../FWCoreLibrary/Config.h"
 #include <string>
 #include <sys/time.h>
+#include <iostream>
 
 #ifndef WIN32
 #include <sys/types.h>
@@ -77,7 +78,7 @@ bool CANHandler::initialize(void (*callback)(int idx, unsigned char* payload, vo
 
 bool CANHandler::runHandler(void)
 {
-    long timestamp;
+    unsigned long timestamp;
     unsigned int idx;
     unsigned char tidx[4];
     unsigned char dlc[1];
@@ -124,8 +125,13 @@ bool CANHandler::runHandler(void)
 
     // Get the timestamp
     struct timeval curTime;
-	gettimeofday(&curTime, NULL);
-	timestamp = (curTime.tv_sec) * 1000 + (curTime.tv_usec) / 1000 ;
+    unsigned long millis = 0;
+    unsigned long seconds = 0;
+
+    gettimeofday(&curTime, NULL);
+    seconds = (curTime.tv_sec % 100000) * 1000;
+    millis = (curTime.tv_usec / 1000);
+    timestamp = seconds + millis ;
 
     // Now fire the callback
     m_callback( (int)idx, payload, m_arg, sdlc, timestamp );
