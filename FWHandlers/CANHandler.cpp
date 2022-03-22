@@ -37,7 +37,7 @@ CANHandler::~CANHandler()
 #endif
 }
 
-bool CANHandler::initialize(void (*callback)(int idx, unsigned char* payload, void* arg, int dlc, long timestamp), void* arg)
+bool CANHandler::initialize(void (*callback)(int idx, unsigned char* payload, void* arg, int dlc, unsigned long long timestamp), void* arg)
 {
     m_callback = callback;
     m_arg = arg;
@@ -78,8 +78,10 @@ bool CANHandler::initialize(void (*callback)(int idx, unsigned char* payload, vo
 
 bool CANHandler::runHandler(void)
 {
-    unsigned long timestamp;
+    
+    unsigned long long timestamp=0;
     unsigned int idx;
+    unsigned char ttimestmp[6];
     unsigned char tidx[4];
     unsigned char dlc[1];
     unsigned char payload[8];
@@ -96,9 +98,18 @@ bool CANHandler::runHandler(void)
     if (poll(&m_poll, 1, 100) < 1) {
         return true;
     }
+    
+    // Read the Timestamp
+    int k = read(m_poll.fd, ttimestmp, 6);
+    if (k < 6) {
+	printf("Error reading %d Timestamp\n", k);
+        return false;
+    }
+    //Convert timestamp to long long
+    std::memcpy(&timestamp, ttimestmp, 6);
 
     // Read CAN ID and payload
-    int k = read(m_poll.fd, tidx, 4);
+    k = read(m_poll.fd, tidx, 4);
     if (k < 4) {
 	printf("Error reading %d CAN ID\n", k);
         return false;
@@ -122,16 +133,6 @@ bool CANHandler::runHandler(void)
     }
 
     idx = (tidx[0] << 24) | (tidx[1] << 16) | (tidx[2] << 8) | tidx[3];
-
-    // Get the timestamp
-    struct timeval curTime;
-    unsigned long millis = 0;
-    unsigned long seconds = 0;
-
-    gettimeofday(&curTime, NULL);
-    seconds = (curTime.tv_sec % 100000) * 1000;
-    millis = (curTime.tv_usec / 1000);
-    timestamp = seconds + millis ;
 
     // Now fire the callback
     m_callback( (int)idx, payload, m_arg, sdlc, timestamp );

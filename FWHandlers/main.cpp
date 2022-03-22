@@ -15,7 +15,7 @@ void sig_handler(int sig)
     g_exit = true;
 }
 
-void CAN_callback(int idx, unsigned char* payload, void* arg, int dlc, long timestamp);
+void CAN_callback(int idx, unsigned char* payload, void* arg, int dlc, unsigned long long timestamp);
 
 int main()
 {
@@ -57,7 +57,7 @@ int main()
 	return 0;
 }
 
-void CAN_callback(int idx, unsigned char* payload, void* arg, int dlc, long timestamp)
+void CAN_callback(int idx, unsigned char* payload, void* arg, int dlc, unsigned long long timestamp)
 {
     int fwInst = *(int*)arg;
 
@@ -68,5 +68,5 @@ void CAN_callback(int idx, unsigned char* payload, void* arg, int dlc, long time
     //printf("\n");
 
     processMessage(fwInst, idx, payload, dlc, timestamp);
-    //fflush(stdout);
+    fflush(stdout);
 }
