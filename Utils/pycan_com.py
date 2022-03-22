@@ -31,11 +31,13 @@ def create_pipe(pipe_path):
 
 def send_message_on_pipe(pipeout, msg):
 
-    sent_msg = (msg.arbitration_id).to_bytes(4,'big') + (msg.dlc).to_bytes(1,'little') + msg.data
+    #print(int(msg.timestamp*1000))
+    #print((int(msg.timestamp*1000)).to_bytes(6,'little'))
+    sent_msg = ((int(msg.timestamp*1000)).to_bytes(6,'little')) + (msg.arbitration_id).to_bytes(4,'big') + (msg.dlc).to_bytes(1,'little') + msg.data
 
     d = os.write(pipeout, sent_msg)
     ts = time.time()
-    logger.debug("{} Sent : {} bytes. Payload: {}".format(str(ts), str(d), str(sent_msg)))
+    #logger.debug("{} Sent : {} bytes. Payload: {}".format(str(ts), str(d), str(sent_msg)))
 
 def send_message_on_can(bus, msg):
     bus.send(msg)
