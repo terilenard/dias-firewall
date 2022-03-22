@@ -20,7 +20,7 @@ public:
 	RuleRunner(const bool usesTPM, const bool usesFreqProc, const bool usesFreqNotifier, const int notifierTimer);
 	virtual ~RuleRunner();
 
-	int permitMessage(const int iMsgID, const unsigned char* pPayload, const int nPayloadSz, const long timestamp);
+	int permitMessage(const int iMsgID, const unsigned char* pPayload, const int nPayloadSz, const unsigned long long timestamp);
 
 private:
 	int permitRuleChain(const int iMsgID, const unsigned char* pPayload, const int nPayloadSz);

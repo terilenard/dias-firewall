@@ -71,7 +71,7 @@ bool TPMLogger::logMessage(const string& msg)
         return false;
     }
 
-    printf("Message '%s' was sent to TPM for logging!\n", msg.c_str());
+    //printf("Message '%s' was sent to TPM for logging!\n", msg.c_str());
 #endif
 
     return true;

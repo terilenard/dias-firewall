@@ -18,7 +18,7 @@ public:
 public:
 	bool initialize(void);
 	void destroy(void);
-	int permitMessage(const int iMsgID, const unsigned char* pPayload, const int nPayloadSz, const long timestamp);
+	int permitMessage(const int iMsgID, const unsigned char* pPayload, const int nPayloadSz, const unsigned long long timestamp);
 
 private:
 	bool readConfigFile(void);

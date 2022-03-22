@@ -139,7 +139,7 @@ bool FirewallManager::readConfigFile(void)
 	return true;
 }
 
-int FirewallManager::permitMessage(const int iMsgID, const unsigned char* pPayload, const int nPayloadSz, const long timestamp)
+int FirewallManager::permitMessage(const int iMsgID, const unsigned char* pPayload, const int nPayloadSz, const unsigned long long timestamp)
 {
 	return m_pRuleRunner->permitMessage(iMsgID, pPayload, nPayloadSz, timestamp);
 }

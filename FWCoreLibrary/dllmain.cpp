@@ -56,7 +56,7 @@ FWCORE_API int destroyFWInstance(int iFwInstance) {
 	return FWCORE_RESULT_OK;
 }
 
-FWCORE_API int processMessage(int iFwInstance, const int iMsgIdx, const unsigned char* pPayload, const int nPayloadSz, const long timestamp)
+FWCORE_API int processMessage(int iFwInstance, const int iMsgIdx, const unsigned char* pPayload, const int nPayloadSz, const unsigned long long timestamp)
 {
 	std::map<int, FirewallManager*>::iterator fwInst = g_mapFWInstances.find(iFwInstance);
 	if (fwInst == g_mapFWInstances.end()) {

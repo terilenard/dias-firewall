@@ -7,6 +7,7 @@
 #include <iostream>
 #include <mutex> 
 #include <sstream>
+#include <vector>
 #include "BaseLogger.h"
 
 #ifdef _WIN32
@@ -49,7 +50,7 @@ FrequencyProcessor::~FrequencyProcessor()
 	my_thread_.join();
 }
 
-int FrequencyProcessor::processNewID(const int ID, const long timestamp)
+int FrequencyProcessor::processNewID(const int ID, const unsigned long long timestamp)
 {
 	/* Process a new ID:
 					 - Convert the ID and timestamp to int
@@ -57,7 +58,7 @@ int FrequencyProcessor::processNewID(const int ID, const long timestamp)
 					 - If the ID exists in the ID Freqnecy structure but has not yet been seen, save the current timestamp
 						*/
 
-	unsigned long currFreq;
+	int currFreq;
 	tuple<int, int, int> definedFreq;
 
 	mapitterator = idFrequencyMap.find(ID);
@@ -169,7 +170,7 @@ int FrequencyProcessor::readFileAndCreateIDFreqMap(const char * fileName)
 			idFrequencyMap.insert(make_pair(idInt, make_tuple(freqInt[0], freqInt[1], freqInt[2])));
 
 			mtx.lock();
-			idTimestampMap.insert(pair<int, int>(idInt, 0));
+			idTimestampMap.insert(pair<int, unsigned long long>(idInt, 0));
 			mtx.unlock();
 
 		}
@@ -193,10 +194,11 @@ error:
 void FrequencyProcessor::frequencyNotifier()
 {
 	struct timeval current_time;
-	unsigned long duration = 0, delay = 0;
-	map <unsigned long, unsigned long>::iterator it;
+	unsigned long long duration = 0, delay = 0;
+	map <int, unsigned long long>::iterator it;
+	double duration_d = 0.0;
 	stringstream message;
-
+	vector<string> alerts;
 
 	while (thShouldRun)
 	{
@@ -204,13 +206,16 @@ void FrequencyProcessor::frequencyNotifier()
 		if (thReady == 1)
 		{
 			// Get current time
-			unsigned long millis = 0;
-			unsigned long seconds = 0;
+			unsigned int  millis = 0;
+			unsigned long long seconds = 0;
 			gettimeofday(&current_time, NULL);
 
-			seconds = (current_time.tv_sec % 100000) * 1000;
+			seconds = ((unsigned long long)current_time.tv_sec) * 1000;
 			millis = (current_time.tv_usec / 1000);
 			duration = seconds + millis ;
+
+			duration_d = (seconds + millis) / 1000.00;
+			//cout << duration << " " << duration/1000.0 << " " << duration_d<<endl;
 
 			mtx.lock();
 			it = idTimestampMap.begin();
@@ -218,19 +223,34 @@ void FrequencyProcessor::frequencyNotifier()
 			while (it != idTimestampMap.end())
 			{
 				delay = duration - it->second;
-
-				if ((duration - it->second) > (notifierTimer * 1000))
+				if (((duration - it->second) > (notifierTimer * 1000)) && (it->second != 0))
 				{
-					message.clear();
-					message.str(string());
-					message << "Frame not recieved for: " << delay << "ms CAN ID: " << it->first <<" ." << std::endl;
-					logobj->logMessage(message.str());
+					//message.clear();
+					//message.str(string());
+
+					//message << "Frame not recieved for: " << delay << "ms CAN ID: " << it->first <<" . Timestamp: " << to_string(duration_d) << " . \n";
+					
+					alerts.push_back("Frame not recieved for: " + to_string(delay) + "ms CAN ID: " + to_string(it->first) + " . Timestamp: " + to_string(duration_d) +  " . \n");
+					//logobj->logMessage("Frame not recieved for: " + to_string(delay) + "ms CAN ID: " + to_string(it->first) + " . Timestamp: " + to_string(duration_d) +  " . \n");
 					it ->second = 0;
 					thReady = 0;
 				}
 				it++;
 			}
 			mtx.unlock();
+
+			if ((alerts.size() != 0) && (alerts.size() != idTimestampMap.size()))
+			{
+				mtx.lock();
+				for (std::vector<string>::iterator it = alerts.begin(); it != alerts.end(); ++it)
+				{
+				    logobj->logMessage(*it);
+				}
+				    //std::cout << *it << " ";
+				mtx.unlock();
+			}
+
+			alerts.clear();
 
 			if (message.rdbuf()->in_avail() != 0)
 			{
@@ -242,8 +262,8 @@ void FrequencyProcessor::frequencyNotifier()
 			}
 		}
 		sleep(notifierTimer);
-		message.clear();
-		message.str(string());
+		//message.clear();
+		//message.str(string());
 	}
 }
 

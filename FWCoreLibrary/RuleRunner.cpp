@@ -40,10 +40,10 @@ RuleRunner::~RuleRunner()
 
 }
 
-int RuleRunner::permitMessage(const int iMsgID, const unsigned char* pPayload, const int nPayloadSz, const long timestamp)
+int RuleRunner::permitMessage(const int iMsgID, const unsigned char* pPayload, const int nPayloadSz, const unsigned long long timestamp)
 {
     // Reset log message
-    m_sLogMessage = "Found illegal CAN ID: " + std::to_string(iMsgID) + " timestamp: " + std::to_string(timestamp) + "\n";
+    m_sLogMessage = "Found illegal CAN ID: " + std::to_string(iMsgID) + " . Timestamp: " + std::to_string(timestamp/1000.00) + ". \n";
 
 	// First, look through rule chain
 	int retCode = permitRuleChain(iMsgID, pPayload, nPayloadSz);
@@ -64,7 +64,7 @@ int RuleRunner::permitMessage(const int iMsgID, const unsigned char* pPayload, c
 	
 	if (frCode == FWCORE_FREQ_ERROR)
 	{
-		printf("Frequency Processor Error!");
+		printf("Frequency Processor Error (Negative Frequency!) \n");
 	}
 
 	if (FWCORE_PROC_CHAINUNDEFINED == retCode) {
@@ -86,7 +86,7 @@ int RuleRunner::permitMessage(const int iMsgID, const unsigned char* pPayload, c
 			{
 				if (frCode == FWCORE_FREQ_BAD)
 				{
-					m_logger->logMessage("Frequency out of range CAN ID: " + to_string(iMsgID) + " . \n");
+					m_logger->logMessage("Frequency out of range CAN ID: " + std::to_string(iMsgID) + " . Timestamp: " + std::to_string(timestamp/1000.0) + " . \n");
 					std::cout<<"Out Of Range: "<< to_string(iMsgID) << std::endl;
 				}
 		}
