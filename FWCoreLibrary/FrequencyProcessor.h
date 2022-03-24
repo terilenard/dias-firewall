@@ -2,6 +2,9 @@
 #include <map>
 #include "BaseLogger.h"
 #include <thread>
+#include <mutex>
+
+
 using namespace std;
 
 class FrequencyProcessor
@@ -28,5 +31,6 @@ private:
 	bool thReady = 0;
 	thread my_thread_;
 	int notifierTimer;
+	mutex mtx,mtx2;
 };
 

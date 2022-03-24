@@ -3,6 +3,7 @@
 #include "RuleFileProcessor.h"
 #include <string>
 #include <thread>
+#include <mutex>
 
 class BaseLogger;
 
@@ -35,4 +36,5 @@ private:
     bool useTPM, useFreqProc, useFreqNotifier;
     FrequencyProcessor* fp;
 	thread th;
+    mutex mtx;
 };

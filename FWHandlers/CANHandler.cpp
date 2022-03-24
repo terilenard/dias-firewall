@@ -102,7 +102,7 @@ bool CANHandler::runHandler(void)
     // Read the Timestamp
     int k = read(m_poll.fd, ttimestmp, 6);
     if (k < 6) {
-	printf("Error reading %d Timestamp\n", k);
+	//printf("Error reading %d Timestamp\n", k);
         return false;
     }
     //Convert timestamp to long long
@@ -111,14 +111,14 @@ bool CANHandler::runHandler(void)
     // Read CAN ID and payload
     k = read(m_poll.fd, tidx, 4);
     if (k < 4) {
-	printf("Error reading %d CAN ID\n", k);
+	//printf("Error reading %d CAN ID\n", k);
         return false;
     }
 
     k =  read(m_poll.fd, dlc, 1);
     if (k < 1) {
-	printf("Error reading %d DLC\n",k );
-	fflush(stdout);
+	//printf("Error reading %d DLC\n",k );
+	//fflush(stdout);
         return false;
     }
 
@@ -127,8 +127,8 @@ bool CANHandler::runHandler(void)
 
     k =  read(m_poll.fd, payload, sdlc);
     if (k < sdlc) {
-	printf("Error reading %d != %d payload\n", k, sdlc);
-	fflush(stdout);
+	//printf("Error reading %d != %d payload\n", k, sdlc);
+	//fflush(stdout);
         return false;
     }
 

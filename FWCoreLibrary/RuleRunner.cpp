@@ -4,6 +4,9 @@
 #include "TPMLogger.h"
 #include <iostream>
 #include <thread>
+#include <mutex>
+
+//mutex mtx;
 
 RuleRunner::RuleRunner()
 {
@@ -86,7 +89,9 @@ int RuleRunner::permitMessage(const int iMsgID, const unsigned char* pPayload, c
 			{
 				if (frCode == FWCORE_FREQ_BAD)
 				{
+					mtx.lock();
 					m_logger->logMessage("Frequency out of range CAN ID: " + std::to_string(iMsgID) + " . Timestamp: " + std::to_string(timestamp/1000.0) + " . \n");
+					mtx.unlock();
 					std::cout<<"Out Of Range: "<< to_string(iMsgID) << std::endl;
 				}
 		}

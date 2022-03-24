@@ -26,7 +26,7 @@
 
 using namespace std;
 
-mutex mtx;
+//mutex mtx,mtx2;
 
 FrequencyProcessor::FrequencyProcessor()
 {
@@ -77,12 +77,12 @@ int FrequencyProcessor::processNewID(const int ID, const unsigned long long time
 			}
 
 			// Compute the current time diff
-			mtx.lock();
+			//////mtx.lock();
 			currFreq = timestamp - idTimestampMap.find(ID)->second;
 
 			// Update the timestamp for this ID
 			idTimestampMap.at(ID) = timestamp;
-			mtx.unlock();
+			//////mtx.unlock();
 
 			definedFreq = idFrequencyMap.at(ID);
 			//std::cout<<"@@@@@@@@ " <<  ID << " " << currFreq << std::endl;
@@ -107,7 +107,7 @@ int FrequencyProcessor::initialize(const char * fileName, BaseLogger * logobj, c
 
 int FrequencyProcessor::verifyFrequency(const int currFreq, tuple<int, int, int> definedFreq)
 {
-	if (currFreq <= 0)
+	if (currFreq < 0)
 	{
 		return FWCORE_FREQ_ERROR;
 	}

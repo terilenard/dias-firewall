@@ -9,19 +9,22 @@ from pycan import *
 sys.path.insert(0, '/etc/diasfw/')
 from config import *
 
-def listen_and_send(canbus, pipeout, listener_type):
 
+def listen_and_send(canbus, pipeout, listener_type):
+    #cnt=0
     listener = setup_listener(listener_type, LOG_FILE)
     notifier = setup_notifier(listener)
 
     logger.debug("Listening for CAN messages")
 
     try:
-        while True:
-            msg = canbus.recv(1)
+        a_listener = can.BufferedReader()
+        notifier = can.Notifier(canbus, [a_listener])
 
-            if msg:
-               send_message_on_pipe(pipeout, msg)
+        while True:
+            msg = a_listener.get_message(0.5)
+            if msg is not None:
+                send_message_on_pipe(pipeout, msg)
 
     except KeyboardInterrupt:
         os.close(pipeout)
