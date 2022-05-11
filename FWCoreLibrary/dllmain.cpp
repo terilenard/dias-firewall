@@ -1,5 +1,14 @@
-// dllmain.cpp : Defines the entry point for the DLL application.
-//#include "pch.h"
+/*
+* This work is licensed under the terms of the MIT license.  
+* For a copy, see <https://opensource.org/licenses/MIT>.
+*
+* Developed by NISLAB - Network and Information Security Laboratory
+* at George Emil Palade University of Medicine, Pharmacy, Science and
+* Technology of Târgu Mureş <https://nislab.umfst.ro/>
+*
+* Contributors: Bela Genge
+*/
+
 #ifdef WIN32
 #include <windows.h>
 #endif
