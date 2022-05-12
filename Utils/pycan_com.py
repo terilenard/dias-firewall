@@ -5,6 +5,7 @@ import time, os
 from .pycan_msg import *
 from .pyc_logger import logger
 
+
 def setup_bus(channel):
     logger.debug("Setting up BUS: " + channel)
 
@@ -31,7 +32,8 @@ def create_pipe(pipe_path):
 
 def send_message_on_pipe(pipeout, msg):
 
-    #print(int(msg.timestamp*1000))
+    #counter=counter+1
+    #print(counter)
     #print((int(msg.timestamp*1000)).to_bytes(6,'little'))
     sent_msg = ((int(msg.timestamp*1000)).to_bytes(6,'little')) + (msg.arbitration_id).to_bytes(4,'big') + (msg.dlc).to_bytes(1,'little') + msg.data
 

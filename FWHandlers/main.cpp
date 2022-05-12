@@ -68,5 +68,5 @@ void CAN_callback(int idx, unsigned char* payload, void* arg, int dlc, unsigned 
     //printf("\n");
 
     processMessage(fwInst, idx, payload, dlc, timestamp);
-    fflush(stdout);
+    //fflush(stdout);
 }
